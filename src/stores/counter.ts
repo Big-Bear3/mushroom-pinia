@@ -1,6 +1,6 @@
-import { State, Store, PiniaStore } from '@/mushroom-pinia-core/src';
+import { State, Store } from '@/mushroom-pinia-core/src';
 
-export class ParentStore extends PiniaStore {
+export class ParentStore {
     @State()
     storeName = 'ParentStore';
 
@@ -17,7 +17,7 @@ export class CounterStore extends ParentStore {
     @State()
     count = 5;
 
-    private sign = '----';
+    sign = '----';
 
     get double() {
         return this.count * 2 + this.sign;

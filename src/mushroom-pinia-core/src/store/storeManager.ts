@@ -1,7 +1,5 @@
 import type { Class } from 'src/types/globalTypes';
 
-import { PiniaStore } from './PiniaStore';
-
 export class StoreManager {
     private static _instance: StoreManager;
 
@@ -27,7 +25,7 @@ export class StoreManager {
         const allStateMemberNames = new Set<string>();
 
         let currentClass = c;
-        while (currentClass && currentClass !== PiniaStore) {
+        while (currentClass) {
             const currentClassStateMemberNames = this.classToStateMemberNames.get(currentClass);
             if (currentClassStateMemberNames) {
                 for (const stateMemberName of currentClassStateMemberNames.reverse()) {
@@ -44,7 +42,7 @@ export class StoreManager {
         const allGetAccessorNames = new Set<string>();
 
         let currentClass = c;
-        while (currentClass && currentClass !== PiniaStore) {
+        while (currentClass && currentClass.prototype) {
             const currentClassMethodNames = Object.getOwnPropertyNames(currentClass.prototype);
             for (const methodName of currentClassMethodNames.reverse()) {
                 if (methodName === 'constructor' || !this.isGetAccessor(currentClass, methodName)) continue;
@@ -64,7 +62,7 @@ export class StoreManager {
         const allMethodNames = new Set<string>();
 
         let currentClass = c;
-        while (currentClass && currentClass !== PiniaStore) {
+        while (currentClass && currentClass.prototype) {
             const currentClassMethodNames = Object.getOwnPropertyNames(currentClass.prototype);
             for (const methodName of currentClassMethodNames.reverse()) {
                 if (methodName === 'constructor' || !this.isMethod(currentClass, methodName)) continue;
@@ -78,15 +76,6 @@ export class StoreManager {
 
     getMethodNames(c: Class): string[] {
         return this.classToMethodNames.get(c);
-    }
-
-    checkAlreadyExtendsPiniaStore(c: Class): boolean {
-        let currentClass = Object.getPrototypeOf(c);
-        while (currentClass) {
-            if (currentClass === PiniaStore) return true;
-            currentClass = Object.getPrototypeOf(currentClass);
-        }
-        return false;
     }
 
     private isGetAccessor(c: Class, methodName: string): boolean {

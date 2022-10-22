@@ -19,24 +19,27 @@ app.mount('#app');
 ```
 
 ```ts
-import { State, Store, PiniaStore } from 'mushroom-pinia';
+import { State, Store } from 'mushroom-pinia';
 
 @Store('counter')
-export class CounterStore extends PiniaStore {
+export class CounterStore {
     @State()
     count = 5; // Pinia States
 
-    get double() { // Pinia Getters
+    get double() {
+        // Pinia Getters
         return this.count * 2;
     }
 
-    increment() { // Pinia Actions
+    increment() {
+        // Pinia Actions
         this.count++;
     }
 }
 ```
 
 In tsconfig.json:
+
 ```js
 "compilerOptions": {
     // ...
@@ -44,7 +47,9 @@ In tsconfig.json:
     // ...
 }
 ```
+
 In your Vue component：
+
 ```
 <template>
     <main>
@@ -67,6 +72,4 @@ function increment() {
 </script>
 ```
 
-强烈推荐使用[**Mushroom**](https://github.com/Big-Bear3/mushroom-di)依赖管理工具，方便对store实例进行管理。
-
-
+强烈推荐使用[**Mushroom**](https://github.com/Big-Bear3/mushroom-di)依赖管理工具，方便对 store 实例进行管理。

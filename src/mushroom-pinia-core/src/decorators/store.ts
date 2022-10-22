@@ -9,9 +9,6 @@ export function Store(id: string): ClassDecorator {
     return function (target: NormalClass) {
         const storeManager = StoreManager.instance;
 
-        if (!storeManager.checkAlreadyExtendsPiniaStore(target))
-            Message.throwError('29001', `该Store（${target.name}）未继承PiniaStore！`);
-
         storeManager.addGetAccessorNames(target);
         storeManager.addMethodNames(target);
 
@@ -19,7 +16,7 @@ export function Store(id: string): ClassDecorator {
             const storeClassInstance = new target(...args);
 
             const stateMemberNames = storeManager.getStateMemberNames(target.prototype);
-            if (!stateMemberNames) Message.throwError('29002', `该Store（${target.name}）中无State！`);
+            if (!stateMemberNames) Message.throwError('29001', `该Store（${target.name}）中无State！`);
 
             const stateMembers: Record<string, unknown> = {};
             for (const stateMemberName of stateMemberNames) {
@@ -49,6 +46,21 @@ export function Store(id: string): ClassDecorator {
                 getters: getAccessors,
                 actions: methods
             })();
+
+            for (const memberName in storeClassInstance) {
+                if (stateMemberNames.indexOf(memberName) === -1) {
+                    Reflect.defineProperty(storeClassInstance.definedPiniaStore, memberName, {
+                        enumerable: true,
+                        configurable: true,
+                        get() {
+                            return storeClassInstance[memberName];
+                        },
+                        set(value: unknown) {
+                            storeClassInstance[memberName] = value;
+                        }
+                    });
+                }
+            }
 
             for (const stateMemberName of stateMemberNames) {
                 Reflect.defineProperty(storeClassInstance, stateMemberName, {

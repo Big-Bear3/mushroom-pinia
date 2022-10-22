@@ -20,13 +20,13 @@ import { State, Store, PiniaStore } from 'mushroom-pinia';
 @Store()
 export class CounterStore extends PiniaStore {
     @State()
-    count = 5;
+    count = 5; // Pinia States
 
-    get double() {
+    get double() { // Pinia Getters
         return this.count * 2;
     }
 
-    increment() {
+    increment() { // Pinia Actions
         this.count++;
     }
 }

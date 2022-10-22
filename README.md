@@ -33,7 +33,7 @@ export class CounterStore extends PiniaStore {
 ```
 
 tsconfig.json
-```json
+```js
 "compilerOptions": {
     // ...
     "experimentalDecorators": true,

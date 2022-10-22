@@ -32,7 +32,7 @@ export class CounterStore extends PiniaStore {
 }
 ```
 
-tsconfig.json:
+In tsconfig.json:
 ```js
 "compilerOptions": {
     // ...
@@ -40,3 +40,29 @@ tsconfig.json:
     // ...
 }
 ```
+In Vue Component：
+```
+<template>
+    <main>
+        <div>count: {{ store.count }}</div>
+        <div>doubleCount: {{ store.double }}</div>
+        <div>
+            <button @click="increment">Increment</button>
+        </div>
+    </main>
+</template>
+
+<script setup lang="ts">
+import { CounterStore } from '@/stores/counter';
+
+const store = new CounterStore();
+
+function increment() {
+    store.increment();
+}
+</script>
+```
+
+强烈推荐使用[**Mushroom**](https://github.com/Big-Bear3/mushroom-di)依赖管理工具，方便对store实例进行管理。
+
+

@@ -2,6 +2,10 @@
 
 Use it like:
 
+```bash
+npm i -S pinia mushroom-pinia
+```
+
 ```ts
 import { createApp } from 'vue';
 import App from './App.vue';
@@ -40,7 +44,7 @@ In tsconfig.json:
     // ...
 }
 ```
-In Vue Component：
+In your Vue component：
 ```
 <template>
     <main>

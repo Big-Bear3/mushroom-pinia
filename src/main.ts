@@ -1,6 +1,6 @@
 import { createApp } from 'vue';
 import App from './App.vue';
-import { mushroomPinia } from 'mushroom-pinia2';
+import { mushroomPinia } from 'mushroom-pinia';
 
 import './assets/main.css';
 

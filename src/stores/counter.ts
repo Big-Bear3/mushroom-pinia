@@ -1,7 +1,7 @@
 // import { State, Store } from '@/mushroom-pinia-core/src';
 // import { PiniaStore } from '@/mushroom-pinia-core/src/store/PiniaStore';
 
-import { State, Store, PiniaStore } from 'mushroom-pinia1';
+import { State, Store, PiniaStore } from 'mushroom-pinia';
 
 export class ParentStore extends PiniaStore {
     @State()

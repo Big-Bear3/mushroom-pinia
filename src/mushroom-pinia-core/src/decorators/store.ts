@@ -5,7 +5,7 @@ import { defineStore } from 'pinia';
 import { StoreManager } from '../store/storeManager';
 import { Message } from '../utils/message';
 
-export function Store(): ClassDecorator {
+export function Store(id: string): ClassDecorator {
     return function (target: NormalClass) {
         const storeManager = StoreManager.instance;
 
@@ -34,7 +34,7 @@ export function Store(): ClassDecorator {
                 }
             }
 
-            storeClassInstance.definedPiniaStore = defineStore('counter', {
+            storeClassInstance.definedPiniaStore = defineStore(id, {
                 state: () => stateMembers,
                 getters: getAccessors
             })();

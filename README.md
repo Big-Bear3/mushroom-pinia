@@ -31,3 +31,12 @@ export class CounterStore extends PiniaStore {
     }
 }
 ```
+
+tsconfig.json:
+```js
+"compilerOptions": {
+    // ...
+    "experimentalDecorators": true,
+    // ...
+}
+```

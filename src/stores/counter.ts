@@ -3,32 +3,17 @@
 
 import { State, Store, PiniaStore } from 'mushroom-pinia';
 
-export class ParentStore extends PiniaStore {
-    @State()
-    storeName = 'ParentStore';
-
-    @State()
-    count = 10;
-
-    get aa(): any {
-        return null;
-    }
-}
-
 @Store()
-export class CounterStore extends ParentStore {
+export class CounterStore extends PiniaStore {
     @State()
     count = 5;
 
-    private sign = '----';
-
     get double() {
-        return this.count * 2 + this.sign;
+        return this.count * 2;
     }
 
     increment() {
         this.count++;
-        this.storeName = '123';
     }
 }
 

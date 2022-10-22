@@ -13,6 +13,7 @@ export function Store(id: string): ClassDecorator {
             Message.throwError('29001', `该Store（${target.name}）未继承PiniaStore！`);
 
         storeManager.addGetAccessorNames(target);
+        storeManager.addMethodNames(target);
 
         return function (...args: unknown[]) {
             const storeClassInstance = new target(...args);
@@ -34,9 +35,19 @@ export function Store(id: string): ClassDecorator {
                 }
             }
 
+            const methods: Record<string, () => unknown> = {};
+            const methodNames = storeManager.getMethodNames(target);
+
+            if (methodNames) {
+                for (const methodName of methodNames) {
+                    methods[methodName] = storeClassInstance[methodName].bind(storeClassInstance);
+                }
+            }
+
             storeClassInstance.definedPiniaStore = defineStore(id, {
                 state: () => stateMembers,
-                getters: getAccessors
+                getters: getAccessors,
+                actions: methods
             })();
 
             for (const stateMemberName of stateMemberNames) {
@@ -52,7 +63,7 @@ export function Store(id: string): ClassDecorator {
                 });
             }
 
-            return storeClassInstance;
+            return storeClassInstance.definedPiniaStore;
         };
     } as ClassDecorator;
 }

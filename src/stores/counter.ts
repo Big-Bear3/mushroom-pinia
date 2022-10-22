@@ -1,7 +1,4 @@
-// import { State, Store } from '@/mushroom-pinia-core/src';
-// import { PiniaStore } from '@/mushroom-pinia-core/src/store/PiniaStore';
-
-import { State, Store, PiniaStore } from 'mushroom-pinia';
+import { State, Store, PiniaStore } from '@/mushroom-pinia-core/src';
 
 export class ParentStore extends PiniaStore {
     @State()
@@ -31,4 +28,3 @@ export class CounterStore extends ParentStore {
         this.storeName = '123';
     }
 }
-

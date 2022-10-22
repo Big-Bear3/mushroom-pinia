@@ -22,11 +22,11 @@ export class CounterStore extends PiniaStore {
     @State()
     count = 5;
 
-    get double() {
+    get double() { // Pinia Getters
         return this.count * 2;
     }
 
-    increment() {
+    increment() { // Pinia Actions
         this.count++;
     }
 }

@@ -17,7 +17,7 @@ app.mount('#app');
 ```ts
 import { State, Store, PiniaStore } from 'mushroom-pinia';
 
-@Store()
+@Store('counter')
 export class CounterStore extends PiniaStore {
     @State()
     count = 5; // Pinia States

@@ -1,4 +1,5 @@
 import type { Class } from 'src/types/globalTypes';
+import type { PiniaStore } from './PiniaStore';
 
 export class StoreManager {
     private static _instance: StoreManager;
@@ -18,8 +19,8 @@ export class StoreManager {
     /** 类和类与其父类中的方法名名的映射 */
     private classToMethodNames = new Map<Class, string[]>();
 
-    /** 已创建的Store Id集合 */
-    private createdStoreIds = new Set<string>();
+    /** store id和pinia store实例的映射 */
+    private idToPiniaStore = new Map<string, PiniaStore>();
 
     addStateMemberName(c: Class, stateMemberName: string): void {
         let stateMemberNames = this.classToStateMemberNames.get(c);
@@ -101,12 +102,16 @@ export class StoreManager {
         return this.classToMethodNames.get(c);
     }
 
-    addStoreId(storeId: string): void {
-        this.createdStoreIds.add(storeId);
+    addPiniaStore(storeId: string, store: PiniaStore): void {
+        this.idToPiniaStore.set(storeId, store);
+    }
+
+    getPiniaStore(storeId: string): PiniaStore {
+        return this.idToPiniaStore.get(storeId);
     }
 
     storeIsCreated(storeId: string): boolean {
-        return this.createdStoreIds.has(storeId);
+        return this.idToPiniaStore.has(storeId);
     }
 
     private getMethodType(c: Class, methodName: string): 'constructor' | 'set' | 'get' | 'setget' | 'method' {

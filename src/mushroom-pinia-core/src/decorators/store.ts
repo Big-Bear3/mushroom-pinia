@@ -16,10 +16,13 @@ export function Store(id: string | ((classStoreInstance: any) => string)): Class
 
             const storeId = typeof id === 'function' ? id(classStoreInstance) : id;
 
-            if (storeManager.storeIsCreated(storeId)) Message.throwError('29001', `该Store（id: ${storeId}）已经创建！`);
+            if (storeManager.storeIsCreated(storeId)) {
+                Message.warn('20001', `该Store（id: ${storeId}）已经创建过，将返回该Store的实例！`);
+                return storeManager.getPiniaStore(storeId);
+            }
 
             const stateMemberNames = storeManager.getStateMemberNames(target.prototype);
-            if (!stateMemberNames) Message.throwError('29002', `该Store（${target.name}）中无State！`);
+            if (!stateMemberNames) Message.throwError('29001', `该Store（${target.name}）中无State！`);
 
             const stateMembers: Record<string, unknown> = {};
             for (const stateMemberName of stateMemberNames) {
@@ -56,6 +59,8 @@ export function Store(id: string | ((classStoreInstance: any) => string)): Class
             handleBothAccessors(storeManager.getBothAccessorNames(target), classStoreInstance, piniaStoreInstance);
 
             setPiniaBuiltinPropsToClassStoreInstance(classStoreInstance, piniaStoreInstance);
+
+            storeManager.addPiniaStore(storeId, piniaStoreInstance);
 
             return piniaStoreInstance;
         };

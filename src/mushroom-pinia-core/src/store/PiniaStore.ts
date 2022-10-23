@@ -1,20 +1,30 @@
-import type { Store } from 'pinia';
+import type { StoreOnActionListener, SubscriptionCallback, _DeepPartial } from 'pinia';
+import type { UnwrapRef, WatchOptions } from 'vue';
+import type { Actions, Getters, States } from '../types/globalTypes';
 
 export abstract class PiniaStore {
-    // $state: UnwrapRef<S> & PiniaCustomStateProperties<S>;
-    // $patch(partialState: _DeepPartial<UnwrapRef<S>>): void;
-    // $patch<F extends (state: UnwrapRef<S>) => any>(stateMutator: ReturnType<F> extends Promise<any> ? never : F): void;
-    // $reset(): void;
-    // $subscribe(
-    //     callback: SubscriptionCallback<S>,
-    //     options?: {
-    //         detached?: boolean;
-    //     } & WatchOptions
-    // ): () => void;
-    // $onAction(callback: StoreOnActionListener<Id, S, G, A>, detached?: boolean): () => void;
-    // $dispose(): void;
+    declare $id: string;
 
-    $reset: () => void;
+    declare $state: UnwrapRef<States<this>>;
 
-    private definedPiniaStore: Store;
+    declare $patch: ((partialState: _DeepPartial<UnwrapRef<States<this>>>) => void) &
+        (<F extends (state: UnwrapRef<States<this>>) => any>(
+            stateMutator: ReturnType<F> extends Promise<any> ? never : F
+        ) => void);
+
+    declare $reset: () => void;
+
+    declare $subscribe: (
+        callback: SubscriptionCallback<States<this>>,
+        options?: {
+            detached?: boolean;
+        } & WatchOptions
+    ) => () => void;
+
+    declare $onAction: (
+        callback: StoreOnActionListener<string, States<this>, Getters<this>, Actions<this>>,
+        detached?: boolean
+    ) => () => void;
+
+    declare $dispose: () => void;
 }

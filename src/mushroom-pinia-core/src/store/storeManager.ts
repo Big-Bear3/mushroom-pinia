@@ -1,6 +1,5 @@
 import type { Class } from 'src/types/globalTypes';
-
-import { PiniaStore } from './PiniaStore';
+import type { PiniaStore } from './PiniaStore';
 
 export class StoreManager {
     private static _instance: StoreManager;
@@ -8,11 +7,20 @@ export class StoreManager {
     /** 类和类与其父类中@State()装饰器装饰的成员变量名的映射 */
     private classToStateMemberNames = new Map<Class, string[]>();
 
+    /** 类和类与其父类中的set访问器名的映射 */
+    private classToSetAccessorNames = new Map<Class, string[]>();
+
     /** 类和类与其父类中的get访问器名的映射 */
     private classToGetAccessorNames = new Map<Class, string[]>();
 
+    /** 类和类与其父类中同时拥有set、get的访问器名的映射 */
+    private classToBothAccessorNames = new Map<Class, string[]>();
+
     /** 类和类与其父类中的方法名名的映射 */
     private classToMethodNames = new Map<Class, string[]>();
+
+    /** store id和pinia store实例的映射 */
+    private idToPiniaStore = new Map<string, PiniaStore>();
 
     addStateMemberName(c: Class, stateMemberName: string): void {
         let stateMemberNames = this.classToStateMemberNames.get(c);
@@ -27,7 +35,7 @@ export class StoreManager {
         const allStateMemberNames = new Set<string>();
 
         let currentClass = c;
-        while (currentClass && currentClass !== PiniaStore) {
+        while (currentClass) {
             const currentClassStateMemberNames = this.classToStateMemberNames.get(currentClass);
             if (currentClassStateMemberNames) {
                 for (const stateMemberName of currentClassStateMemberNames.reverse()) {
@@ -40,65 +48,80 @@ export class StoreManager {
         return Array.from(allStateMemberNames).reverse();
     }
 
-    addGetAccessorNames(c: Class): void {
+    addAccessorAndMethodNames(c: Class): void {
+        const allSetAccessorNames = new Set<string>();
         const allGetAccessorNames = new Set<string>();
+        const allBothAccessorNames = new Set<string>();
+        const allMethodNames = new Set<string>();
 
         let currentClass = c;
-        while (currentClass && currentClass !== PiniaStore) {
+        while (currentClass && currentClass.prototype) {
             const currentClassMethodNames = Object.getOwnPropertyNames(currentClass.prototype);
             for (const methodName of currentClassMethodNames.reverse()) {
-                if (methodName === 'constructor' || !this.isGetAccessor(currentClass, methodName)) continue;
-                allGetAccessorNames.add(methodName);
+                const methodType = this.getMethodType(currentClass, methodName);
+                switch (methodType) {
+                    case 'set':
+                        allSetAccessorNames.add(methodName);
+                        break;
+
+                    case 'get':
+                        allGetAccessorNames.add(methodName);
+                        break;
+
+                    case 'setget':
+                        allBothAccessorNames.add(methodName);
+                        break;
+
+                    case 'method':
+                        allMethodNames.add(methodName);
+                        break;
+                }
             }
             currentClass = Object.getPrototypeOf(currentClass);
         }
 
-        this.classToGetAccessorNames.set(c, Array.from(allGetAccessorNames).reverse());
+        if (allSetAccessorNames.size > 0) this.classToSetAccessorNames.set(c, Array.from(allSetAccessorNames).reverse());
+        if (allGetAccessorNames.size > 0) this.classToGetAccessorNames.set(c, Array.from(allGetAccessorNames).reverse());
+        if (allBothAccessorNames.size > 0) this.classToBothAccessorNames.set(c, Array.from(allBothAccessorNames).reverse());
+        if (allMethodNames.size > 0) this.classToMethodNames.set(c, Array.from(allMethodNames).reverse());
+    }
+
+    getSetAccessorNames(c: Class): string[] {
+        return this.classToSetAccessorNames.get(c);
     }
 
     getGetAccessorNames(c: Class): string[] {
         return this.classToGetAccessorNames.get(c);
     }
 
-    addMethodNames(c: Class): void {
-        const allMethodNames = new Set<string>();
-
-        let currentClass = c;
-        while (currentClass && currentClass !== PiniaStore) {
-            const currentClassMethodNames = Object.getOwnPropertyNames(currentClass.prototype);
-            for (const methodName of currentClassMethodNames.reverse()) {
-                if (methodName === 'constructor' || !this.isMethod(currentClass, methodName)) continue;
-                allMethodNames.add(methodName);
-            }
-            currentClass = Object.getPrototypeOf(currentClass);
-        }
-
-        this.classToMethodNames.set(c, Array.from(allMethodNames).reverse());
+    getBothAccessorNames(c: Class): string[] {
+        return this.classToBothAccessorNames.get(c);
     }
 
     getMethodNames(c: Class): string[] {
         return this.classToMethodNames.get(c);
     }
 
-    checkAlreadyExtendsPiniaStore(c: Class): boolean {
-        let currentClass = Object.getPrototypeOf(c);
-        while (currentClass) {
-            if (currentClass === PiniaStore) return true;
-            currentClass = Object.getPrototypeOf(currentClass);
-        }
-        return false;
+    addPiniaStore(storeId: string, store: PiniaStore): void {
+        this.idToPiniaStore.set(storeId, store);
     }
 
-    private isGetAccessor(c: Class, methodName: string): boolean {
-        const descriptor = Object.getOwnPropertyDescriptor(c.prototype, methodName);
-        if (descriptor.get && !descriptor.set) return true;
-        return false;
+    getPiniaStore(storeId: string): PiniaStore {
+        return this.idToPiniaStore.get(storeId);
     }
 
-    private isMethod(c: Class, methodName: string): boolean {
+    storeIsCreated(storeId: string): boolean {
+        return this.idToPiniaStore.has(storeId);
+    }
+
+    private getMethodType(c: Class, methodName: string): 'constructor' | 'set' | 'get' | 'setget' | 'method' {
+        if (methodName === 'constructor') return 'constructor';
         const descriptor = Object.getOwnPropertyDescriptor(c.prototype, methodName);
-        if (descriptor.value && !descriptor.set && !descriptor.get) return true;
-        return false;
+        if (descriptor.set && !descriptor.get) return 'set';
+        if (!descriptor.set && descriptor.get) return 'get';
+        if (descriptor.set && descriptor.get) return 'setget';
+        if (descriptor.value && !descriptor.set && !descriptor.get) return 'method';
+        return undefined;
     }
 
     static get instance(): StoreManager {

@@ -31,31 +31,3 @@ export type Getters<T extends Record<string | symbol | number, any>> = ReadonlyP
 export type Actions<T extends Record<string | symbol | number, any>> = {
     [P in keyof T as P extends PiniaKeys ? never : T[P] extends (...args: any[]) => any ? P : never]: T[P];
 };
-
-// export class CounterStore {
-//     count = 5;
-
-//     readonly cc: string;
-
-//     get double() {
-//         return this.count * 2;
-//     }
-
-//     set double(v: number) {}
-
-//     increment() {
-//         this.count++;
-//     }
-// }
-
-// const instance = new CounterStore();
-
-// const aa = {
-//     a: '123'
-// };
-
-// type i = typeof instance;
-
-// type s = States<typeof instance>;
-// type g = Getters<typeof instance>;
-// type a = Actions<typeof instance>;

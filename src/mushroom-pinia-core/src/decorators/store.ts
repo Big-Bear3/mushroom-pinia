@@ -55,6 +55,8 @@ export function Store(id: string | ((classStoreInstance: any) => string)): Class
             handleSetAccessors(storeManager.getSetAccessorNames(target), classStoreInstance, piniaStoreInstance);
             handleBothAccessors(storeManager.getBothAccessorNames(target), classStoreInstance, piniaStoreInstance);
 
+            setPiniaBuiltinPropsToClassStoreInstance(classStoreInstance, piniaStoreInstance);
+
             return piniaStoreInstance;
         };
     } as ClassDecorator;
@@ -134,5 +136,15 @@ function handleBothAccessors(
                 classStoreInstance[bothAccessorName] = value;
             }
         });
+    }
+}
+
+function setPiniaBuiltinPropsToClassStoreInstance(
+    classStoreInstance: Record<string | symbol | number, any>,
+    piniaStoreInstance: Store
+): void {
+    const piniaBuiltinPropNames = ['$id', '$state', '$patch', '$reset', '$subscribe', '$onAction', '$dispose'];
+    for (const propName of piniaBuiltinPropNames) {
+        classStoreInstance[propName] = piniaStoreInstance[propName];
     }
 }

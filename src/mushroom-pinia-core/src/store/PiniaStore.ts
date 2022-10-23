@@ -3,6 +3,8 @@ import type { UnwrapRef, WatchOptions } from 'vue';
 import type { Actions, Getters, States } from '../types/globalTypes';
 
 export abstract class PiniaStore {
+    declare $id: string;
+
     declare $state: UnwrapRef<States<this>>;
 
     declare $patch: ((partialState: _DeepPartial<UnwrapRef<States<this>>>) => void) &

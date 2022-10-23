@@ -18,7 +18,7 @@ export type NonReadonlyProps<T extends Record<string | symbol | number, any>> = 
     [P in keyof T as Equal<Readonly<{ [K in P]: T[K] }>, { [K in P]: T[K] }> extends true ? never : P]: T[P];
 };
 
-type PiniaKeys = '$state' | '$patch' | '$reset' | '$subscribe' | '$onAction' | '$dispose';
+type PiniaKeys = '$id' | '$state' | '$patch' | '$reset' | '$subscribe' | '$onAction' | '$dispose';
 
 export type States<T extends Record<string | symbol | number, any>> = NonReadonlyProps<{
     [P in keyof T as P extends PiniaKeys ? never : T[P] extends (...args: any[]) => any ? never : P]: T[P];

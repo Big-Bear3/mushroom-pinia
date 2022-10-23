@@ -11,9 +11,13 @@
 
 <script setup lang="ts">
 import { CounterStore } from '@/stores/counter';
+import { of, by } from 'mushroom-di';
 import { watch } from 'vue';
 
-const store = new CounterStore();
+const store = by(CounterStore, 'counter');
+const store2 = by(CounterStore, 'counter2');
+
+const b = store === store2;
 
 store.$patch({
     storeName: '',

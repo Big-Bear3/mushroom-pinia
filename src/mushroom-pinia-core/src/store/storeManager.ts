@@ -18,6 +18,9 @@ export class StoreManager {
     /** 类和类与其父类中的方法名名的映射 */
     private classToMethodNames = new Map<Class, string[]>();
 
+    /** 已创建的Store Id集合 */
+    private createdStoreIds = new Set<string>();
+
     addStateMemberName(c: Class, stateMemberName: string): void {
         let stateMemberNames = this.classToStateMemberNames.get(c);
         if (!stateMemberNames) {
@@ -96,6 +99,14 @@ export class StoreManager {
 
     getMethodNames(c: Class): string[] {
         return this.classToMethodNames.get(c);
+    }
+
+    addStoreId(storeId: string): void {
+        this.createdStoreIds.add(storeId);
+    }
+
+    storeIsCreated(storeId: string): boolean {
+        return this.createdStoreIds.has(storeId);
     }
 
     private getMethodType(c: Class, methodName: string): 'constructor' | 'set' | 'get' | 'setget' | 'method' {

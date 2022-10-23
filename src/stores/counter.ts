@@ -1,4 +1,5 @@
 import { PiniaStore, State, Store } from '@/mushroom-pinia-core/src';
+import { Injectable } from 'mushroom-di';
 
 export class ParentStore extends PiniaStore {
     #aa = 123;
@@ -18,7 +19,8 @@ export class ParentStore extends PiniaStore {
     }
 }
 
-@Store(() => 'counter')
+@Injectable({ type: 'singleton' })
+@Store((counterStore: CounterStore) => counterStore.id)
 export class CounterStore extends ParentStore {
     @State()
     count = 5;
@@ -47,5 +49,10 @@ export class CounterStore extends ParentStore {
     increment() {
         this.count++;
         this.storeName = '123';
+    }
+
+    constructor(public id: string) {
+        super();
+        console.log(id);
     }
 }

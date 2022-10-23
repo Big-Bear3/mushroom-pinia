@@ -2,15 +2,17 @@
     "name": "mushroom-pinia",
     "version": "0.0.0",
     "scripts": {
-        "dev": "vite",
+        "dev": "vite --force",
         "build": "run-p type-check build-only",
         "preview": "vite preview --port 4173",
         "test:unit": "vitest --environment jsdom",
         "build-only": "vite build",
         "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
-        "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+        "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+        "help": "vite -h "
     },
     "dependencies": {
+        "mushroom-di": "^1.3.0",
         "pinia": "^2.0.23",
         "vue": "^3.2.38"
     },

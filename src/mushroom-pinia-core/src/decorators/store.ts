@@ -5,22 +5,21 @@ import { defineStore } from 'pinia';
 import { StoreManager } from '../store/storeManager';
 import { Message } from '../utils/message';
 
-export function Store(id: string): ClassDecorator {
+export function Store(id: string | ((classStoreInstance: any) => string)): ClassDecorator {
     return function (target: NormalClass) {
         const storeManager = StoreManager.instance;
 
-        storeManager.addGetAccessorNames(target);
-        storeManager.addMethodNames(target);
+        storeManager.addAccessorAndMethodNames(target);
 
         return function (...args: unknown[]) {
-            const storeClassInstance = new target(...args);
+            const classStoreInstance = new target(...args);
 
             const stateMemberNames = storeManager.getStateMemberNames(target.prototype);
             if (!stateMemberNames) Message.throwError('29001', `该Store（${target.name}）中无State！`);
 
             const stateMembers: Record<string, unknown> = {};
             for (const stateMemberName of stateMemberNames) {
-                stateMembers[stateMemberName] = storeClassInstance[stateMemberName];
+                stateMembers[stateMemberName] = classStoreInstance[stateMemberName];
             }
 
             const getAccessors: Record<string, () => unknown> = {};
@@ -28,7 +27,7 @@ export function Store(id: string): ClassDecorator {
 
             if (getAccessorNames) {
                 for (const getAccessorName of getAccessorNames) {
-                    getAccessors[getAccessorName] = () => storeClassInstance[getAccessorName];
+                    getAccessors[getAccessorName] = () => classStoreInstance[getAccessorName];
                 }
             }
 
@@ -37,45 +36,99 @@ export function Store(id: string): ClassDecorator {
 
             if (methodNames) {
                 for (const methodName of methodNames) {
-                    methods[methodName] = storeClassInstance[methodName].bind(storeClassInstance);
+                    methods[methodName] = classStoreInstance[methodName].bind(classStoreInstance);
                 }
             }
 
-            storeClassInstance.definedPiniaStore = defineStore(id, {
+            const piniaStoreInstance = defineStore(typeof id === 'function' ? id(classStoreInstance) : id, {
                 state: () => stateMembers,
                 getters: getAccessors,
                 actions: methods
             })();
 
-            for (const memberName in storeClassInstance) {
-                if (stateMemberNames.indexOf(memberName) === -1) {
-                    Reflect.defineProperty(storeClassInstance.definedPiniaStore, memberName, {
-                        enumerable: true,
-                        configurable: true,
-                        get() {
-                            return storeClassInstance[memberName];
-                        },
-                        set(value: unknown) {
-                            storeClassInstance[memberName] = value;
-                        }
-                    });
-                }
-            }
+            handleStateMembers(stateMemberNames, classStoreInstance, piniaStoreInstance);
+            handleNonStateMembers(stateMemberNames, classStoreInstance, piniaStoreInstance);
+            handleSetAccessors(storeManager.getSetAccessorNames(target), classStoreInstance, piniaStoreInstance);
+            handleBothAccessors(storeManager.getBothAccessorNames(target), classStoreInstance, piniaStoreInstance);
 
-            for (const stateMemberName of stateMemberNames) {
-                Reflect.defineProperty(storeClassInstance, stateMemberName, {
-                    enumerable: true,
-                    configurable: true,
-                    get() {
-                        return (<any>storeClassInstance.definedPiniaStore)[stateMemberName];
-                    },
-                    set(value: unknown) {
-                        (<Store>storeClassInstance.definedPiniaStore).$patch({ [stateMemberName]: value });
-                    }
-                });
-            }
-
-            return storeClassInstance.definedPiniaStore;
+            return piniaStoreInstance;
         };
     } as ClassDecorator;
+}
+
+function handleStateMembers(
+    stateMemberNames: string[],
+    classStoreInstance: Record<string | symbol | number, any>,
+    piniaStoreInstance: Store
+): void {
+    for (const stateMemberName of stateMemberNames) {
+        Reflect.defineProperty(classStoreInstance, stateMemberName, {
+            enumerable: true,
+            configurable: true,
+            get() {
+                return piniaStoreInstance[stateMemberName];
+            },
+            set(value: unknown) {
+                piniaStoreInstance.$patch({ [stateMemberName]: value });
+            }
+        });
+    }
+}
+
+function handleNonStateMembers(
+    stateMemberNames: string[],
+    classStoreInstance: Record<string | symbol | number, any>,
+    piniaStoreInstance: Store
+): void {
+    for (const memberName in classStoreInstance) {
+        if (stateMemberNames.indexOf(memberName) === -1) {
+            Reflect.defineProperty(piniaStoreInstance, memberName, {
+                enumerable: true,
+                configurable: true,
+                get() {
+                    return classStoreInstance[memberName];
+                },
+                set(value: unknown) {
+                    classStoreInstance[memberName] = value;
+                }
+            });
+        }
+    }
+}
+
+function handleSetAccessors(
+    setAccessorNames: string[],
+    classStoreInstance: Record<string | symbol | number, any>,
+    piniaStoreInstance: Store
+): void {
+    if (!setAccessorNames) return;
+    for (const setAccessorName of setAccessorNames) {
+        Reflect.defineProperty(piniaStoreInstance, setAccessorName, {
+            enumerable: true,
+            configurable: true,
+            set(value: unknown) {
+                classStoreInstance[setAccessorName] = value;
+            }
+        });
+    }
+}
+
+function handleBothAccessors(
+    bothAccessorNames: string[],
+    classStoreInstance: Record<string | symbol | number, any>,
+    piniaStoreInstance: Store
+): void {
+    if (!bothAccessorNames) return;
+    for (const bothAccessorName of bothAccessorNames) {
+        Reflect.defineProperty(piniaStoreInstance, bothAccessorName, {
+            enumerable: true,
+            configurable: true,
+            get() {
+                return classStoreInstance[bothAccessorName];
+            },
+            set(value: unknown) {
+                classStoreInstance[bothAccessorName] = value;
+            }
+        });
+    }
 }

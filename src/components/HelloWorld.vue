@@ -2,6 +2,7 @@
     <main>
         <div>count: {{ store.count }}</div>
         <div>doubleCount: {{ store.double }}</div>
+        <div>store: {{ store.aa }}</div>
         <div>
             <button @click="increment">Increment</button>
         </div>
@@ -13,6 +14,20 @@ import { CounterStore } from '@/stores/counter';
 import { watch } from 'vue';
 
 const store = new CounterStore();
+
+store.$patch({
+    storeName: '',
+    count: 1
+});
+
+store.$state.count;
+store.$state.sign;
+store.$state.storeName;
+store.$state.storeName;
+
+setTimeout(() => {
+    store.aa = 66;
+}, 2222);
 
 watch(
     () => store.count,

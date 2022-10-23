@@ -1,4 +1,4 @@
-import type { PiniaCustomStateProperties, StoreOnActionListener, SubscriptionCallback, _DeepPartial } from 'pinia';
+import type { StoreOnActionListener, SubscriptionCallback, _DeepPartial } from 'pinia';
 import type { App, UnwrapRef, WatchOptions } from 'vue';
 
 export type Class<T = any> = abstract new (...args: any[]) => T;
@@ -10,7 +10,7 @@ export function Store(id: string): ClassDecorator;
 export function State(): PropertyDecorator;
 
 export abstract class PiniaStore {
-    $state: UnwrapRef<States<this>> & PiniaCustomStateProperties<States<this>>;
+    $state: UnwrapRef<States<this>>;
     $patch(partialState: _DeepPartial<UnwrapRef<States<this>>>): void;
     $patch<F extends (state: UnwrapRef<States<this>>) => any>(stateMutator: ReturnType<F> extends Promise<any> ? never : F): void;
     $reset(): void;

@@ -1,9 +1,9 @@
-import type { PiniaCustomStateProperties, StoreOnActionListener, SubscriptionCallback, _DeepPartial } from 'pinia';
+import type { StoreOnActionListener, SubscriptionCallback, _DeepPartial } from 'pinia';
 import type { UnwrapRef, WatchOptions } from 'vue';
 import type { Actions, Getters, States } from '../types/globalTypes';
 
 export abstract class PiniaStore {
-    declare $state: UnwrapRef<States<this>> & PiniaCustomStateProperties<States<this>>;
+    declare $state: UnwrapRef<States<this>>;
 
     declare $patch: ((partialState: _DeepPartial<UnwrapRef<States<this>>>) => void) &
         (<F extends (state: UnwrapRef<States<this>>) => any>(

@@ -74,4 +74,10 @@ export class CounterStore extends PiniaStore {
 }
 ```
 
+### 使用
+
+```ts
+const counterStore = new CounterStore();
+```
+
 强烈推荐使用[**Mushroom**](https://github.com/Big-Bear3/mushroom-di)依赖管理工具，方便对 store 实例进行管理。

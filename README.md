@@ -105,3 +105,4 @@ const counterStore = new CounterStore();
 * 您可以使用继承，在父类中也可以通过 **@State()** 装饰器定义States，属性、访问器和方法的规则同上。记得在继承链最上层的类继承 **PiniaStore**，否则将无Pinia内置属性和方法（$开头的）的类型推断。
 * 如果您想在Store内部使用Pinia内置属性和方法，如：this.$patch({ count: 1 })，记得对this进行强制类型转换：(<CounterStore>this).$patch({ count: 1 }); 否则会导致类型推断不正确。（不确定是否是Typescript的bug）
 * **mushroom-pinia** 是支持全类型推断的，要注意的是，由于Typescript的类型系统无法区分某个属性是否被某个装饰器装饰过，尽量将非State的成员变量设为private，以免将其误当成State来用。
+* 如果您使用[**mushroom-di**](https://github.com/Big-Bear3/mushroom-di)进行依赖管理，请将 **@Injectable()** 装饰器置于 **@Store()** 装饰器上边。

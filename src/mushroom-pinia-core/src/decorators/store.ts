@@ -1,6 +1,8 @@
 import type { NormalClass, StoreOptions } from '../types/globalTypes';
-import type { Store } from 'pinia';
 
+//import { createPinia, setActivePinia } from 'pinia';
+
+import { Store } from 'pinia';
 import { defineStore } from 'pinia';
 import { StoreManager } from '../store/storeManager';
 import { Message } from '../utils/message';
@@ -49,6 +51,8 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
                     methods[methodName] = classStoreInstance[methodName].bind(classStoreInstance);
                 }
             }
+
+            // setActivePinia(createPinia());
 
             const piniaStoreInstance = defineStore(storeId, {
                 state: () => stateMembers,

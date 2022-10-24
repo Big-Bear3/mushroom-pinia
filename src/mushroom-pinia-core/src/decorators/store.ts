@@ -1,11 +1,11 @@
-import type { NormalClass } from '../types/globalTypes';
+import type { NormalClass, StoreOptions } from '../types/globalTypes';
 import type { Store } from 'pinia';
 
 import { defineStore } from 'pinia';
 import { StoreManager } from '../store/storeManager';
 import { Message } from '../utils/message';
 
-export function Store(id: string | ((classStoreInstance: any) => string)): ClassDecorator {
+export function Store<T extends Record<string | symbol | number, any>>(storeOptions: StoreOptions<T>): ClassDecorator {
     return function (target: NormalClass) {
         const storeManager = StoreManager.instance;
 
@@ -14,7 +14,10 @@ export function Store(id: string | ((classStoreInstance: any) => string)): Class
         return function (...args: unknown[]) {
             const classStoreInstance = new target(...args);
 
-            const storeId = typeof id === 'function' ? id(classStoreInstance) : id;
+            const storeId =
+                typeof storeOptions.id === 'function'
+                    ? storeOptions.id.call(classStoreInstance, classStoreInstance)
+                    : storeOptions.id;
 
             if (storeManager.storeIsCreated(storeId)) {
                 Message.warn('20001', `该Store（id: ${storeId}）已经创建过，将返回该Store的实例！`);

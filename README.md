@@ -74,7 +74,7 @@ export class CounterStore extends PiniaStore {
 }
 ```
 
-支持动态的Store id，您可以使用一个Store类中的成员变量去构建你的Store id：
+支持动态的Store id，您可以使用Store类中的成员变量去构建你的Store id：
 ```ts
 @Store<CounterStore>({
     id: function () {

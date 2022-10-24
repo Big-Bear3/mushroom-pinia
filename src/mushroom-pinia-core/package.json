@@ -15,12 +15,9 @@
         "build": "webpack --mode=production --node-env=production",
         "build:dev": "webpack --mode=development"
     },
-    "dependencies": {
-        "pinia": "^2.0.21"
-    },
     "peerDependencies": {
-        "vue": "^3.0.0",
-        "pinia": "^2.0.0"
+        "pinia": "^2.0.0",
+        "vue": "^3.0.0"
     },
     "devDependencies": {
         "@types/jest": "^29.0.1",

@@ -1,46 +1,61 @@
 <template>
     <main>
-        <div>count: {{ store.count }}</div>
-        <div>doubleCount: {{ store.double }}</div>
-        <div>store: {{ store.aa }}</div>
+        <div>version: {{ appStore.version }}</div>
+        <div>count: {{ appStore.count }}</div>
+        <div>doubleCount: {{ appStore.double }}</div>
+        <div>doubleWithSigh: {{ appStore.doubleWithSigh }}</div>
+        <div>loginUser: {{ appStore.loginUser }}</div>
         <div>
             <button @click="increment">Increment</button>
+            <button @click="addVersionSuffix">AddVersionSuffix</button>
+            <button @click="setVersion">SetVersion</button>
+            <button @click="setLoginUser">SetLoginUser</button>
+            <button @click="patchCount">Patch</button>
+            <button @click="resetStore">ResetStore</button>
         </div>
     </main>
 </template>
 
 <script setup lang="ts">
-import { CounterStore } from '@/stores/counter';
-import { of, by } from 'mushroom-di';
-import { watch } from 'vue';
+import { AppStore } from '@/stores/appStore';
 
-const store = by(CounterStore, 'counter');
-const store2 = by(CounterStore, 'counter2');
-
-const b = store === store2;
-
-store.$patch({
-    storeName: '',
-    count: 1
-});
-
-store.$state.count;
-store.$state.sign;
-store.$state.storeName;
-store.$state.storeName;
-
-setTimeout(() => {
-    store.aa = 66;
-}, 2222);
-
-watch(
-    () => store.count,
-    () => {
-        console.log(store.count);
-    }
-);
+const appStore = new AppStore();
 
 function increment() {
-    store.increment();
+    appStore.increment();
 }
+
+function addVersionSuffix() {
+    appStore.versionSuffix = '！';
+}
+
+function setVersion() {
+    appStore.version = '1.0.0';
+}
+
+function setLoginUser() {
+    appStore.loginUser = '张三';
+}
+
+function patchCount() {
+    appStore.$patch({
+        count: 0
+    });
+}
+
+function resetStore() {
+    appStore.$reset();
+}
+
+appStore.$onAction(
+    ({
+        name, // action 名称
+        store, // store 实例，类似 `someStore`
+        args, // 传递给 action 的参数数组
+        after, // 在 action 返回或解决后的钩子
+        onError // action 抛出或拒绝的钩子
+    }) => {
+        console.log(name);
+    }
+);
 </script>

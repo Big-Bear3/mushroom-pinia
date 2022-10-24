@@ -5,7 +5,7 @@
         "dev": "vite --force",
         "build": "run-p type-check build-only",
         "preview": "vite preview --port 4173",
-        "test:unit": "vitest --environment jsdom",
+        "test": "vitest --environment jsdom",
         "build-only": "vite build",
         "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
         "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
@@ -32,7 +32,7 @@
         "prettier": "^2.7.1",
         "typescript": "~4.8.4",
         "vite": "^3.0.9",
-        "vitest": "^0.23.0",
+        "vitest": "^0.24.3",
         "vue-tsc": "^0.40.7"
     }
 }

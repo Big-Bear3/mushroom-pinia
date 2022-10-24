@@ -6,7 +6,7 @@
 import { State, Store } from 'mushroom-pinia';
 
 @Store({ id: 'counter' })
-export class CounterStore {
+export class CounterStore extends PiniaStore {
     @State()
     count = 0; // Pinia State
 

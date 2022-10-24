@@ -1,4 +1,4 @@
-# mushroom-pinia —— 基于 Pinia 的 Class 风格的状态管理库
+# 一款基于 Pinia 的 Class 风格的状态管理库
 
 ## 用法风格概览
 
@@ -74,7 +74,23 @@ export class CounterStore extends PiniaStore {
 }
 ```
 
-### 使用
+支持动态的Store id，您可以使用一个Store类中的成员变量去构建你的Store id：
+```ts
+@Store<CounterStore>({
+    id: function () {
+        return this.idPrefix + this.storeId;
+    }
+})
+export class CounterStore extends PiniaStore {
+    private readonly idPrefix = 'app-';
+
+    constructor(private storeId: string) {
+        super();
+    }
+}
+```
+
+### 使用Store
 
 ```ts
 const counterStore = new CounterStore();

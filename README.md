@@ -98,7 +98,7 @@ export class CounterStore extends PiniaStore {
 const counterStore = new CounterStore();
 ```
 
-## 强烈推荐使用[**Mushroom**](https://github.com/Big-Bear3/mushroom-di)依赖管理工具，方便对 store 实例进行管理。
+#### 强烈推荐使用[**Mushroom**](https://github.com/Big-Bear3/mushroom-di)依赖管理工具，方便对 store 实例进行管理。
 
 ### 原理及注意事项
 * 您可以像定义一个正常的Class一样去定义你的Store，**Mushroom** 会将所有 **@State()** 装饰器装饰的成员变量转成Pinia的States，所有get访问器转换为Pinia的Getters，所有方法转换为Pinia的Actions，未被 **@State()** 装饰器装饰的成员变量仍作为成员变量。但要注意的是，set访问器并不会转换成Pinia的Actions，只是会作为一个普通的访问器。如果您同时定义了同名的set和get访问器，此get访问器也不会转换为Pinia的Getters，都将作为普通的访问器。

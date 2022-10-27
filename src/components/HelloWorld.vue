@@ -3,8 +3,9 @@
         <div>version: {{ appStore.version }}</div>
         <div>count: {{ appStore.count }}</div>
         <div>doubleCount: {{ appStore.double }}</div>
-        <div>doubleWithSigh: {{ appStore.doubleWithSigh }}</div>
+        <div>doubleWithSign: {{ appStore.doubleWithSign }}</div>
         <div>loginUser: {{ appStore.loginUser }}</div>
+        <div>sign: {{ appStore.sign }}</div>
         <div>
             <button @click="increment">Increment</button>
             <button @click="addVersionSuffix">AddVersionSuffix</button>

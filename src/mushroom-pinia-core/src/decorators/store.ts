@@ -22,12 +22,12 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
                     : storeOptions.id;
 
             if (storeManager.storeIsCreated(storeId)) {
-                Message.warn('20001', `该Store（id: ${storeId}）已经创建过，将返回该Store的实例！`);
+                Message.warn('20001', `该Store (id: ${storeId}) 已经创建过，将返回该Store的实例！`);
                 return storeManager.getPiniaStore(storeId);
             }
 
             const stateMemberNames = storeManager.getStateMemberNames(target.prototype);
-            if (!stateMemberNames) Message.throwError('29001', `该Store（${target.name}）中无State！`);
+            if (stateMemberNames.length === 0) Message.throwError('29001', `该Store (${target.name}) 中无State！`);
 
             const stateMembers: Record<string, unknown> = {};
             for (const stateMemberName of stateMemberNames) {
@@ -35,7 +35,7 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
             }
 
             const getAccessors: Record<string, () => unknown> = {};
-            const getAccessorNames = storeManager.getGetAccessorNames(target);
+            const getAccessorNames = storeManager.getNonSymbolGetAccessorNames(target);
 
             if (getAccessorNames) {
                 for (const getAccessorName of getAccessorNames) {
@@ -44,7 +44,7 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
             }
 
             const methods: Record<string, () => unknown> = {};
-            const methodNames = storeManager.getMethodNames(target);
+            const methodNames = storeManager.getNonSymbolMethodNames(target);
 
             if (methodNames) {
                 for (const methodName of methodNames) {
@@ -64,6 +64,8 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
             handleNonStateMembers(stateMemberNames, classStoreInstance, piniaStoreInstance);
             handleSetAccessors(storeManager.getSetAccessorNames(target), classStoreInstance, piniaStoreInstance);
             handleBothAccessors(storeManager.getBothAccessorNames(target), classStoreInstance, piniaStoreInstance);
+            handleSymbolGetAccessors(storeManager.getSymbolGetAccessorNames(target), classStoreInstance, piniaStoreInstance);
+            handleSymbolMethods(storeManager.getSymbolMethodNames(target), classStoreInstance, piniaStoreInstance);
 
             setPiniaBuiltinPropsToClassStoreInstance(classStoreInstance, piniaStoreInstance);
 
@@ -98,8 +100,10 @@ function handleNonStateMembers(
     classStoreInstance: Record<string | symbol | number, any>,
     piniaStoreInstance: Store
 ): void {
-    for (const memberName in classStoreInstance) {
-        if (stateMemberNames.indexOf(memberName) === -1) {
+    const classStoreMemberNames = Reflect.ownKeys(classStoreInstance);
+
+    for (const memberName of classStoreMemberNames) {
+        if (typeof memberName === 'symbol' || stateMemberNames.indexOf(memberName) === -1) {
             Reflect.defineProperty(piniaStoreInstance, memberName, {
                 enumerable: true,
                 configurable: true,
@@ -115,14 +119,14 @@ function handleNonStateMembers(
 }
 
 function handleSetAccessors(
-    setAccessorNames: string[],
+    setAccessorNames: (string | symbol)[],
     classStoreInstance: Record<string | symbol | number, any>,
     piniaStoreInstance: Store
 ): void {
     if (!setAccessorNames) return;
     for (const setAccessorName of setAccessorNames) {
         Reflect.defineProperty(piniaStoreInstance, setAccessorName, {
-            enumerable: true,
+            enumerable: false,
             configurable: true,
             set(value: unknown) {
                 classStoreInstance[setAccessorName] = value;
@@ -132,14 +136,14 @@ function handleSetAccessors(
 }
 
 function handleBothAccessors(
-    bothAccessorNames: string[],
+    bothAccessorNames: (string | symbol)[],
     classStoreInstance: Record<string | symbol | number, any>,
     piniaStoreInstance: Store
 ): void {
     if (!bothAccessorNames) return;
     for (const bothAccessorName of bothAccessorNames) {
         Reflect.defineProperty(piniaStoreInstance, bothAccessorName, {
-            enumerable: true,
+            enumerable: false,
             configurable: true,
             get() {
                 return classStoreInstance[bothAccessorName];
@@ -147,6 +151,38 @@ function handleBothAccessors(
             set(value: unknown) {
                 classStoreInstance[bothAccessorName] = value;
             }
+        });
+    }
+}
+
+function handleSymbolGetAccessors(
+    symbolGetAccessorNames: (string | symbol)[],
+    classStoreInstance: Record<string | symbol | number, any>,
+    piniaStoreInstance: Store
+): void {
+    if (!symbolGetAccessorNames) return;
+    for (const symbolGetAccessorName of symbolGetAccessorNames) {
+        Reflect.defineProperty(piniaStoreInstance, symbolGetAccessorName, {
+            enumerable: false,
+            configurable: true,
+            get() {
+                return classStoreInstance[symbolGetAccessorName];
+            }
+        });
+    }
+}
+
+function handleSymbolMethods(
+    symbolMethodNames: (string | symbol)[],
+    classStoreInstance: Record<string | symbol | number, any>,
+    piniaStoreInstance: Store
+): void {
+    if (!symbolMethodNames) return;
+    for (const symbolMethodName of symbolMethodNames) {
+        Reflect.defineProperty(piniaStoreInstance, symbolMethodName, {
+            enumerable: false,
+            configurable: true,
+            value: classStoreInstance[symbolMethodName]
         });
     }
 }

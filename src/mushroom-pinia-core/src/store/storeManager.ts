@@ -8,16 +8,16 @@ export class StoreManager {
     private classToStateMemberNames = new Map<Class, string[]>();
 
     /** 类和类与其父类中的set访问器名的映射 */
-    private classToSetAccessorNames = new Map<Class, string[]>();
+    private classToSetAccessorNames = new Map<Class, (string | symbol)[]>();
 
     /** 类和类与其父类中的get访问器名的映射 */
-    private classToGetAccessorNames = new Map<Class, string[]>();
+    private classToGetAccessorNames = new Map<Class, (string | symbol)[]>();
 
     /** 类和类与其父类中同时拥有set、get的访问器名的映射 */
-    private classToBothAccessorNames = new Map<Class, string[]>();
+    private classToBothAccessorNames = new Map<Class, (string | symbol)[]>();
 
     /** 类和类与其父类中的方法名名的映射 */
-    private classToMethodNames = new Map<Class, string[]>();
+    private classToMethodNames = new Map<Class, (string | symbol)[]>();
 
     /** store id和pinia store实例的映射 */
     private idToPiniaStore = new Map<string, PiniaStore>();
@@ -49,14 +49,14 @@ export class StoreManager {
     }
 
     addAccessorAndMethodNames(c: Class): void {
-        const allSetAccessorNames = new Set<string>();
-        const allGetAccessorNames = new Set<string>();
-        const allBothAccessorNames = new Set<string>();
-        const allMethodNames = new Set<string>();
+        const allSetAccessorNames = new Set<string | symbol>();
+        const allGetAccessorNames = new Set<string | symbol>();
+        const allBothAccessorNames = new Set<string | symbol>();
+        const allMethodNames = new Set<string | symbol>();
 
         let currentClass = c;
         while (currentClass && currentClass.prototype) {
-            const currentClassMethodNames = Object.getOwnPropertyNames(currentClass.prototype);
+            const currentClassMethodNames = Reflect.ownKeys(currentClass.prototype);
             for (const methodName of currentClassMethodNames.reverse()) {
                 const methodType = this.getMethodType(currentClass, methodName);
                 switch (methodType) {
@@ -86,20 +86,28 @@ export class StoreManager {
         if (allMethodNames.size > 0) this.classToMethodNames.set(c, Array.from(allMethodNames).reverse());
     }
 
-    getSetAccessorNames(c: Class): string[] {
+    getSetAccessorNames(c: Class): (string | symbol)[] {
         return this.classToSetAccessorNames.get(c);
     }
 
-    getGetAccessorNames(c: Class): string[] {
-        return this.classToGetAccessorNames.get(c);
+    getSymbolGetAccessorNames(c: Class): symbol[] {
+        return <symbol[]>this.classToGetAccessorNames.get(c)?.filter((name) => typeof name === 'symbol');
     }
 
-    getBothAccessorNames(c: Class): string[] {
+    getNonSymbolGetAccessorNames(c: Class): string[] {
+        return <string[]>this.classToGetAccessorNames.get(c)?.filter((name) => typeof name === 'string');
+    }
+
+    getBothAccessorNames(c: Class): (string | symbol)[] {
         return this.classToBothAccessorNames.get(c);
     }
 
-    getMethodNames(c: Class): string[] {
-        return this.classToMethodNames.get(c);
+    getSymbolMethodNames(c: Class): symbol[] {
+        return <symbol[]>this.classToMethodNames.get(c)?.filter((name) => typeof name === 'symbol');
+    }
+
+    getNonSymbolMethodNames(c: Class): string[] {
+        return <string[]>this.classToMethodNames.get(c)?.filter((name) => typeof name === 'string');
     }
 
     addPiniaStore(storeId: string, store: PiniaStore): void {
@@ -114,14 +122,16 @@ export class StoreManager {
         return this.idToPiniaStore.has(storeId);
     }
 
-    private getMethodType(c: Class, methodName: string): 'constructor' | 'set' | 'get' | 'setget' | 'method' {
+    private getMethodType(c: Class, methodName: string | symbol): 'constructor' | 'set' | 'get' | 'setget' | 'method' {
         if (methodName === 'constructor') return 'constructor';
         const descriptor = Object.getOwnPropertyDescriptor(c.prototype, methodName);
         if (descriptor.set && !descriptor.get) return 'set';
         if (!descriptor.set && descriptor.get) return 'get';
         if (descriptor.set && descriptor.get) return 'setget';
         if (descriptor.value && !descriptor.set && !descriptor.get) return 'method';
+        /* c8 ignore next */
         return undefined;
+        /* c8 ignore next */
     }
 
     static get instance(): StoreManager {

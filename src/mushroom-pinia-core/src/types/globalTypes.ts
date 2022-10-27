@@ -9,7 +9,7 @@ export interface MethodDescriptor {
 }
 
 export type StoreOptions<T extends Record<string | symbol | number, any>> = {
-    id: string | ((instance: T) => string);
+    id?: string | ((instance: T) => string);
 } & ThisType<T>;
 
 type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;

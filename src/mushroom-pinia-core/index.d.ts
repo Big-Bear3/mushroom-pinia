@@ -7,10 +7,10 @@ export type NormalClass<T = any> = new (...args: any[]) => T;
 export const mushroomPinia: { install: (app: App) => void };
 
 export type StoreOptions<T extends Record<string | symbol | number, any>> = {
-    id: string | ((instance: T) => string);
+    id?: string | ((instance: T) => string);
 } & ThisType<T>;
 
-export function Store<T extends Record<string | symbol | number, any>>(id: StoreOptions<T>): ClassDecorator;
+export function Store<T extends Record<string | symbol | number, any>>(id?: StoreOptions<T>): ClassDecorator;
 export function State(): PropertyDecorator;
 
 export abstract class PiniaStore {

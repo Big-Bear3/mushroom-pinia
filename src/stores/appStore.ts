@@ -133,3 +133,13 @@ export class DynamicIdStore extends PiniaStore {
         super();
     }
 }
+
+@Store()
+export class ClassNameAsIdStore extends PiniaStore {
+    @State()
+    count = 0;
+
+    innerPatch(value: number) {
+        (<ClassNameAsIdStore>this).$patch({ count: value });
+    }
+}

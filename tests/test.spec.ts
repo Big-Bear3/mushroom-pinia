@@ -4,6 +4,7 @@ import { mushroomPinia, PiniaStore, State, Store } from '../src/mushroom-pinia-c
 import { Message } from '../src/mushroom-pinia-core/src/utils/message';
 import {
     AppStore,
+    ClassNameAsIdStore,
     DynamicIdStore,
     numberBothAccessorName,
     numberGetAccessorName,
@@ -82,6 +83,11 @@ it('id使用回调函数', () => {
 
     const dynamicIdStore3 = new DynamicIdStore('dynamicId2');
     expect(dynamicIdStore3.$id).toBe('dynamicId2');
+});
+
+it('使用类名作为Store id', () => {
+    const classNameAsIdStore = new ClassNameAsIdStore();
+    expect(classNameAsIdStore.$id).toBe('ClassNameAsIdStore');
 });
 
 it('普通成员变量和State成员变量以及字符串key的方法', () => {
@@ -165,4 +171,12 @@ it('支持继承', () => {
     appStore.$patch({ version: '1.0.2' });
     expect(appStore.version).toBe('1.0.2');
     expect(appStore.$state.version).toBe('1.0.2');
+});
+
+it('Class Store内部使用Pinia内置属性', () => {
+    const classNameAsIdStore = new ClassNameAsIdStore();
+    classNameAsIdStore.innerPatch(111);
+
+    expect(classNameAsIdStore.count).toBe(111);
+    expect(classNameAsIdStore.$state.count).toBe(111);
 });

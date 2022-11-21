@@ -2,7 +2,7 @@ import type { NormalClass, StoreOptions } from '../types/globalTypes';
 
 //import { createPinia, setActivePinia } from 'pinia';
 
-import { Store } from 'pinia';
+import { createPinia, getActivePinia, setActivePinia, Store } from 'pinia';
 import { defineStore } from 'pinia';
 import { StoreManager } from '../store/storeManager';
 import { Message } from '../utils/message';
@@ -13,7 +13,7 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
 
         storeManager.addAccessorAndMethodNames(target);
 
-        return function (...args: unknown[]) {
+        const fn = function (...args: unknown[]) {
             // 先创建Class Store对象
             const classStoreInstance = new target(...args);
 
@@ -60,6 +60,10 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
                 }
             }
 
+            if (!getActivePinia()) {
+                setActivePinia(createPinia());
+            }
+
             // 创建Pinia Store
             const piniaStoreInstance = defineStore(storeId, {
                 state: () => stateMembers,
@@ -81,6 +85,14 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
 
             return piniaStoreInstance;
         };
+
+        const staticMemberNames = Reflect.ownKeys(target);
+        for (const staticMemberName of staticMemberNames) {
+            if (staticMemberName === 'length' || staticMemberName === 'name') continue;
+            Reflect.defineProperty(fn, staticMemberName, Reflect.getOwnPropertyDescriptor(target, staticMemberName));
+        }
+
+        return fn;
     } as ClassDecorator;
 }
 

@@ -1,6 +1,5 @@
-import { Pinia, setActivePinia } from 'pinia';
 import { it, expect } from 'vitest';
-import { mushroomPinia, PiniaStore, State, Store } from '../src/mushroom-pinia-core/src';
+import { PiniaStore, State, Store } from '../src/mushroom-pinia-core/src';
 import { Message } from '../src/mushroom-pinia-core/src/utils/message';
 import {
     AppStore,
@@ -21,12 +20,6 @@ import {
 } from '../src/stores/appStore';
 
 Message.toggleConsolePrintable(false);
-
-mushroomPinia.install({
-    use: (pinia: Pinia) => {
-        setActivePinia(pinia);
-    }
-});
 
 it('不能使用key为symbol类型的State', () => {
     const messageHistory = Message.getHistory();
@@ -179,4 +172,10 @@ it('Class Store内部使用Pinia内置属性', () => {
 
     expect(classNameAsIdStore.count).toBe(111);
     expect(classNameAsIdStore.$state.count).toBe(111);
+});
+
+it('静态属性和静态方法', () => {
+    expect(AppStore.serialsNo).toBe('123');
+    AppStore.serialsNo = '456';
+    expect(AppStore.serialsNo).toBe('456');
 });

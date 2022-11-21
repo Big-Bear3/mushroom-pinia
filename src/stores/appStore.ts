@@ -30,6 +30,8 @@ export const symbolMethodName = Symbol('symbolMethodName');
 
 @Store({ id: 'app' })
 export class AppStore extends CommonStore {
+    static serialsNo = '123';
+
     @State()
     count = 5;
 

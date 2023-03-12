@@ -10,7 +10,7 @@ export type StoreOptions<T extends Record<string | symbol | number, any>> = {
     id?: string | ((instance: T) => string);
 } & ThisType<T>;
 
-export function Store<T extends Record<string | symbol | number, any>>(id?: StoreOptions<T>): ClassDecorator;
+export function Store<T extends Record<string | symbol | number, any>>(storeOptions?: StoreOptions<T>): ClassDecorator;
 export function State(): PropertyDecorator;
 
 export abstract class PiniaStore {

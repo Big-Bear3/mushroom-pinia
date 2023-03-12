@@ -83,6 +83,14 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
             // 将此Pinia Store储存起来
             storeManager.addPiniaStore(storeId, piniaStoreInstance);
 
+            Reflect.defineProperty(piniaStoreInstance, StoreManager.originalInstancePropName, {
+                enumerable: false,
+                configurable: false,
+                get() {
+                    return classStoreInstance;
+                }
+            });
+
             return piniaStoreInstance;
         };
 
@@ -91,6 +99,14 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
             if (staticMemberName === 'length' || staticMemberName === 'name') continue;
             Reflect.defineProperty(fn, staticMemberName, Reflect.getOwnPropertyDescriptor(target, staticMemberName));
         }
+
+        Reflect.defineProperty(fn, StoreManager.originalClassPropName, {
+            enumerable: false,
+            configurable: false,
+            get() {
+                return target;
+            }
+        });
 
         return fn;
     } as ClassDecorator;

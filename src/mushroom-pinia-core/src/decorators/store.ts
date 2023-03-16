@@ -73,7 +73,8 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
             })();
 
             handleStateMembers(stateMemberNames, classStoreInstance, piniaStoreInstance);
-            handleNonStateMembers(stateMemberNames, classStoreInstance, piniaStoreInstance);
+            handleNonStateMembers(stateMemberNames, methodNames, classStoreInstance, piniaStoreInstance);
+            handleMethods(methodNames, classStoreInstance, piniaStoreInstance);
             handleSetAccessors(storeManager.getSetAccessorNames(target), classStoreInstance, piniaStoreInstance);
             handleBothAccessors(storeManager.getBothAccessorNames(target), classStoreInstance, piniaStoreInstance);
             handleSymbolGetAccessors(storeManager.getSymbolGetAccessorNames(target), classStoreInstance, piniaStoreInstance);
@@ -136,13 +137,17 @@ function handleStateMembers(
 /** 未被@State()装饰器装饰的成员变量定义成Pinia Store实例的属性 */
 function handleNonStateMembers(
     stateMemberNames: string[],
+    methodNames: string[],
     classStoreInstance: Record<string | symbol | number, any>,
     piniaStoreInstance: Store
 ): void {
     const classStoreMemberNames = Reflect.ownKeys(classStoreInstance);
 
     for (const memberName of classStoreMemberNames) {
-        if (typeof memberName === 'symbol' || stateMemberNames.indexOf(memberName) === -1) {
+        if (
+            typeof memberName === 'symbol' ||
+            (stateMemberNames.indexOf(memberName) === -1 && (!methodNames || methodNames.indexOf(memberName) === -1))
+        ) {
             Reflect.defineProperty(piniaStoreInstance, memberName, {
                 enumerable: true,
                 configurable: true,
@@ -154,6 +159,27 @@ function handleNonStateMembers(
                 }
             });
         }
+    }
+}
+
+/** Class Store中的Method映射至Pinia Store中的Actions */
+function handleMethods(
+    methodNames: string[],
+    classStoreInstance: Record<string | symbol | number, any>,
+    piniaStoreInstance: Store
+): void {
+    if (!methodNames) return;
+
+    for (const methodName of methodNames) {
+        Reflect.defineProperty(classStoreInstance, methodName, {
+            enumerable: false,
+            configurable: true,
+            get() {
+                return (...args: any[]) => {
+                    return piniaStoreInstance[methodName](...args);
+                };
+            }
+        });
     }
 }
 

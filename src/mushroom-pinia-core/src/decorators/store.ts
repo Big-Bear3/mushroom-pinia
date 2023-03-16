@@ -65,10 +65,11 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
             }
 
             // 创建Pinia Store
-            const piniaStoreInstance = defineStore(storeId, {
+            const piniaStoreInstance = defineStore(storeId, <any>{
                 state: () => stateMembers,
                 getters: getAccessors,
-                actions: methods
+                actions: methods,
+                persist: storeOptions?.persist
             })();
 
             handleStateMembers(stateMemberNames, classStoreInstance, piniaStoreInstance);
@@ -81,7 +82,7 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
             setPiniaBuiltinPropsToClassStoreInstance(classStoreInstance, piniaStoreInstance);
 
             // 将此Pinia Store储存起来
-            storeManager.addPiniaStore(storeId, piniaStoreInstance);
+            storeManager.addPiniaStore(storeId, <any>piniaStoreInstance);
 
             Reflect.defineProperty(piniaStoreInstance, StoreManager.originalInstancePropName, {
                 enumerable: false,
@@ -234,7 +235,7 @@ function setPiniaBuiltinPropsToClassStoreInstance(
     classStoreInstance: Record<string | symbol | number, any>,
     piniaStoreInstance: Store
 ): void {
-    const piniaBuiltinPropNames = ['$id', '$state', '$patch', '$reset', '$subscribe', '$onAction', '$dispose'];
+    const piniaBuiltinPropNames = ['$id', '$state', '$patch', '$subscribe', '$onAction', '$hydrate', '$persist'];
     for (const propName of piniaBuiltinPropNames) {
         Reflect.defineProperty(classStoreInstance, propName, {
             enumerable: false,

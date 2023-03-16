@@ -12,13 +12,16 @@
             <button @click="setVersion">SetVersion</button>
             <button @click="setLoginUser">SetLoginUser</button>
             <button @click="patchCount">Patch</button>
-            <button @click="resetStore">ResetStore</button>
+        </div>
+        <div>num: {{ numStore.num }}</div>
+        <div>
+            <button @click="plusNum">Num++</button>
         </div>
     </main>
 </template>
 
 <script setup lang="ts">
-import { AppStore } from '@/stores/appStore';
+import { AppStore, NumStore } from '@/stores/appStore';
 
 const appStore = new AppStore();
 
@@ -44,10 +47,6 @@ function patchCount() {
     });
 }
 
-function resetStore() {
-    appStore.$reset();
-}
-
 appStore.$onAction(
     ({
         name, // action 名称
@@ -59,4 +58,10 @@ appStore.$onAction(
         console.log(name);
     }
 );
+
+const numStore = new NumStore();
+
+function plusNum() {
+    numStore.num++;
+}
 </script>

@@ -28,7 +28,23 @@ export const symbolBothAccessorName = Symbol('symbolBothAccessorName');
 export const numberMethodName = 666;
 export const symbolMethodName = Symbol('symbolMethodName');
 
-@Store({ id: 'app' })
+@Store()
+export class NumStore extends PiniaStore {
+    @State()
+    num = 5;
+}
+
+@Store<AppStore>({
+    id: 'app',
+    persist: {
+        paths: ['count', 'version'],
+        beforeRestore: ({ store }) => {
+            setTimeout(() => {
+                console.log(store.count);
+            });
+        }
+    }
+})
 export class AppStore extends CommonStore {
     static serialsNo = '123';
 

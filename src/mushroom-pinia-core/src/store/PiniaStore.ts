@@ -12,6 +12,8 @@ export abstract class PiniaStore {
             stateMutator: ReturnType<F> extends Promise<any> ? never : F
         ) => void);
 
+    declare $reset: () => void;
+
     declare $subscribe: (
         callback: SubscriptionCallback<States<this>>,
         options?: {
@@ -23,6 +25,8 @@ export abstract class PiniaStore {
         callback: StoreOnActionListener<string, States<this>, Getters<this>, Actions<this>>,
         detached?: boolean
     ) => () => void;
+
+    declare $dispose: () => void;
 
     declare $hydrate: (opts?: { runHooks?: boolean }) => void;
 

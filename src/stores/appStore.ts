@@ -1,3 +1,4 @@
+import { defineStore } from 'pinia';
 import { PiniaStore, State, Store } from '../mushroom-pinia-core/src/';
 
 export class CommonStore extends PiniaStore {
@@ -28,14 +29,30 @@ export const symbolBothAccessorName = Symbol('symbolBothAccessorName');
 export const numberMethodName = 666;
 export const symbolMethodName = Symbol('symbolMethodName');
 
+/* c8 ignore start */
+export const useRawPiniaStore = defineStore('rawPiniaStore', {
+    state: () => {
+        return { count: 0 };
+    },
+    actions: {
+        increment() {
+            this.count++;
+        }
+    }
+});
+/* c8 ignore stop */
+
+/* c8 ignore start */
 @Store()
 export class NumStore extends PiniaStore {
     @State()
     num = 5;
 }
+/* c8 ignore stop */
 
 @Store<AppStore>({
     id: 'app',
+    /* c8 ignore start */
     persist: {
         paths: ['count', 'version'],
         beforeRestore: ({ store }) => {
@@ -44,6 +61,7 @@ export class NumStore extends PiniaStore {
             });
         }
     }
+    /* c8 ignore stop */
 })
 export class AppStore extends CommonStore {
     static serialsNo = '123';
@@ -135,6 +153,10 @@ export class AppStore extends CommonStore {
 
     [symbolMethodName]() {
         this.sign = 'method-symbolMethodName';
+    }
+
+    innerIncrement() {
+        this.increment();
     }
 }
 

@@ -1,5 +1,6 @@
 import { it, expect } from 'vitest';
 import { PiniaStore, State, Store } from '../src/mushroom-pinia-core/src';
+import { StoreManager } from '../src/mushroom-pinia-core/src/store/storeManager';
 import { Message } from '../src/mushroom-pinia-core/src/utils/message';
 import {
     AppStore,
@@ -178,4 +179,32 @@ it('静态属性和静态方法', () => {
     expect(AppStore.serialsNo).toBe('123');
     AppStore.serialsNo = '456';
     expect(AppStore.serialsNo).toBe('456');
+});
+
+it('重置Store', () => {
+    const appStore = new AppStore();
+    appStore.version = '1.0.1';
+    appStore.count = 100;
+    expect(appStore.version + appStore.count).toBe('1.0.1100');
+    appStore.$reset();
+    expect(appStore.version + appStore.count).toBe('1.0.05');
+});
+
+it(' Class Store的方法绑定至Pinia Store', () => {
+    let flag = false;
+    const appStore = new AppStore();
+    appStore.$onAction(({ name }) => {
+        if (name === 'increment') {
+            flag = true;
+        }
+    });
+    appStore.innerIncrement();
+    expect(flag).toBe(true);
+    appStore.count = 5;
+});
+
+it('Pinia Store 和 Class Store的映射', () => {
+    const appStore = new AppStore();
+    expect(AppStore[StoreManager.originalClassPropName].name).toBe('AppStore');
+    expect(appStore[StoreManager.originalInstancePropName].count).toBe(5);
 });

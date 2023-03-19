@@ -20,6 +20,7 @@ export abstract class PiniaStore {
     $state: UnwrapRef<States<this>>;
     $patch(partialState: _DeepPartial<UnwrapRef<States<this>>>): void;
     $patch<F extends (state: UnwrapRef<States<this>>) => any>(stateMutator: ReturnType<F> extends Promise<any> ? never : F): void;
+    $reset(): void;
     $subscribe(
         callback: SubscriptionCallback<States<this>>,
         options?: {
@@ -30,6 +31,7 @@ export abstract class PiniaStore {
         callback: StoreOnActionListener<string, States<this>, Getters<this>, Actions<this>>,
         detached?: boolean
     ): () => void;
+    $dispose(): void;
     $hydrate: (opts?: { runHooks?: boolean }) => void;
     $persist: () => void;
 }
@@ -66,4 +68,4 @@ type NonReadonlyProps<T extends Record<string | symbol | number, any>> = {
     [P in keyof T as Equal<Readonly<{ [K in P]: T[K] }>, { [K in P]: T[K] }> extends true ? never : P]: T[P];
 };
 
-type PiniaKeys = '$id' | '$state' | '$patch' | '$subscribe' | '$onAction';
+type PiniaKeys = '$id' | '$state' | '$patch' | '$reset' | '$subscribe' | '$onAction' | '$dispose' | '$hydrate' | '$persist';

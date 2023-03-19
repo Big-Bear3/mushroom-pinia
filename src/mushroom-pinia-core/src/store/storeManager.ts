@@ -131,10 +131,10 @@ export class StoreManager {
         if (descriptor.set && !descriptor.get) return 'set';
         if (!descriptor.set && descriptor.get) return 'get';
         if (descriptor.set && descriptor.get) return 'setget';
+        /* c8 ignore next */
         if (descriptor.value && !descriptor.set && !descriptor.get) return 'method';
         /* c8 ignore next */
         return undefined;
-        /* c8 ignore next */
     }
 
     static get instance(): StoreManager {

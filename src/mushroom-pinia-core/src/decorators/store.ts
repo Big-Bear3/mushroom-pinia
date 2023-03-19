@@ -1,7 +1,5 @@
 import type { NormalClass, StoreOptions } from '../types/globalTypes';
 
-//import { createPinia, setActivePinia } from 'pinia';
-
 import { createPinia, getActivePinia, setActivePinia, Store } from 'pinia';
 import { defineStore } from 'pinia';
 import { StoreManager } from '../store/storeManager';
@@ -66,7 +64,7 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
 
             // 创建Pinia Store
             const piniaStoreInstance = defineStore(storeId, <any>{
-                state: () => stateMembers,
+                state: () => ({ ...stateMembers }),
                 getters: getAccessors,
                 actions: methods,
                 persist: storeOptions?.persist
@@ -128,7 +126,7 @@ function handleStateMembers(
                 return piniaStoreInstance[stateMemberName];
             },
             set(value: unknown) {
-                piniaStoreInstance.$patch({ [stateMemberName]: value });
+                piniaStoreInstance[stateMemberName] = value;
             }
         });
     }
@@ -261,7 +259,17 @@ function setPiniaBuiltinPropsToClassStoreInstance(
     classStoreInstance: Record<string | symbol | number, any>,
     piniaStoreInstance: Store
 ): void {
-    const piniaBuiltinPropNames = ['$id', '$state', '$patch', '$subscribe', '$onAction', '$hydrate', '$persist'];
+    const piniaBuiltinPropNames = [
+        '$id',
+        '$state',
+        '$patch',
+        '$reset',
+        '$subscribe',
+        '$onAction',
+        '$dispose',
+        '$hydrate',
+        '$persist'
+    ];
     for (const propName of piniaBuiltinPropNames) {
         Reflect.defineProperty(classStoreInstance, propName, {
             enumerable: false,

@@ -7,6 +7,8 @@ export class StoreManager {
     static readonly originalClassPropName = '__mp_class';
     static readonly originalInstancePropName = '__mp_instance';
 
+    static readonly hookMethodNames = ['onStoreCreated'];
+
     /** 类和类与其父类中@State()装饰器装饰的成员变量名的映射 */
     private classToStateMemberNames = new Map<Class, string[]>();
 

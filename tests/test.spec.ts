@@ -12,6 +12,7 @@ import {
     numberPropName,
     numberSetAccessorName,
     numberStatePropName,
+    NumStore,
     symbolBothAccessorName,
     symbolGetAccessorName,
     symbolMethodName,
@@ -190,7 +191,7 @@ it('重置Store', () => {
     expect(appStore.version + appStore.count).toBe('1.0.05');
 });
 
-it(' Class Store的方法绑定至Pinia Store', () => {
+it('Class Store的方法绑定至Pinia Store', () => {
     let flag = false;
     const appStore = new AppStore();
     appStore.$onAction(({ name }) => {
@@ -201,6 +202,11 @@ it(' Class Store的方法绑定至Pinia Store', () => {
     appStore.innerIncrement();
     expect(flag).toBe(true);
     appStore.count = 5;
+});
+
+it('钩子方法', () => {
+    const numStore = new NumStore();
+    expect(numStore.num2).toBe(1);
 });
 
 it('Pinia Store 和 Class Store的映射', () => {

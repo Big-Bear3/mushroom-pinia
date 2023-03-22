@@ -16,6 +16,10 @@ export type StoreOptions<T extends Record<string | symbol | number, any>> = {
     persist?: boolean | PersistedStateOptions<T> | PersistedStateOptions<T>[];
 } & ThisType<T>;
 
+export interface OnStoreCreated {
+    onStoreCreated(): void;
+}
+
 interface PersistedStateOptions<T extends Record<string | symbol | number, any>> {
     key?: string;
     storage?: StorageLike;

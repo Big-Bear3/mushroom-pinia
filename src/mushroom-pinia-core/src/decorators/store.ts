@@ -91,6 +91,8 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
                 }
             });
 
+            classStoreInstance.onStoreCreated?.call(classStoreInstance);
+
             return piniaStoreInstance;
         };
 
@@ -169,6 +171,9 @@ function handleMethods(
     if (!methodNames) return;
 
     for (const methodName of methodNames) {
+        // 钩子方法不作为Store中的Actions
+        if (StoreManager.hookMethodNames.indexOf(methodName) > -1) continue;
+
         Reflect.defineProperty(classStoreInstance, methodName, {
             enumerable: false,
             configurable: true,

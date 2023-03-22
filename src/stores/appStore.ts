@@ -1,4 +1,6 @@
+import type { OnStoreCreated } from '@/mushroom-pinia-core/src/types/globalTypes';
 import { defineStore } from 'pinia';
+import { nextTick, watch } from 'vue';
 import { PiniaStore, State, Store } from '../mushroom-pinia-core/src/';
 
 export class CommonStore extends PiniaStore {
@@ -44,9 +46,43 @@ export const useRawPiniaStore = defineStore('rawPiniaStore', {
 
 /* c8 ignore start */
 @Store()
-export class NumStore extends PiniaStore {
+export class NumStore extends PiniaStore implements OnStoreCreated {
     @State()
     num = 5;
+
+    @State()
+    num2 = 0;
+
+    constructor() {
+        super();
+
+        watch(
+            () => this.num,
+            () => {
+                console.log(4321);
+            }
+        );
+
+        nextTick(() => {
+            watch(
+                () => this.num,
+                () => {
+                    console.log(1111);
+                }
+            );
+        });
+    }
+
+    onStoreCreated() {
+        watch(
+            () => this.num,
+            () => {
+                console.log(1234);
+            }
+        );
+
+        this.num2++;
+    }
 }
 /* c8 ignore stop */
 

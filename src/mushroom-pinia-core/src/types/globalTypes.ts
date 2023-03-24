@@ -16,6 +16,15 @@ export type StoreOptions<T extends Record<string | symbol | number, any>> = {
     persist?: boolean | PersistedStateOptions<T> | PersistedStateOptions<T>[];
 } & ThisType<T>;
 
+export type StateOptions = {
+    noFork?: boolean;
+};
+
+export type StateMemberInfo = {
+    name: string;
+    noFork: boolean;
+};
+
 export interface OnStoreCreated {
     onStoreCreated(): void;
 }

@@ -1,4 +1,4 @@
-import type { Class } from 'src/types/globalTypes';
+import type { Class, StateMemberInfo } from 'src/types/globalTypes';
 import type { PiniaStore } from './PiniaStore';
 
 export class StoreManager {
@@ -10,7 +10,7 @@ export class StoreManager {
     static readonly hookMethodNames = ['onStoreCreated'];
 
     /** 类和类与其父类中@State()装饰器装饰的成员变量名的映射 */
-    private classToStateMemberNames = new Map<Class, string[]>();
+    private classToStateMembersInfo = new Map<Class, StateMemberInfo[]>();
 
     /** 类和类与其父类中的set访问器名的映射 */
     private classToSetAccessorNames = new Map<Class, (string | symbol)[]>();
@@ -27,30 +27,33 @@ export class StoreManager {
     /** store id和pinia store实例的映射 */
     private idToPiniaStore = new Map<string, PiniaStore>();
 
-    addStateMemberName(c: Class, stateMemberName: string): void {
-        let stateMemberNames = this.classToStateMemberNames.get(c);
-        if (!stateMemberNames) {
-            stateMemberNames = [];
-            this.classToStateMemberNames.set(c, stateMemberNames);
+    /** class store的实例和fork的State成员变量的映射 */
+    private classStoreInstanceToOriginalStateMembers = new WeakMap<Record<string | symbol | number, any>, Record<string, any>>();
+
+    addStateMembersInfo(c: Class, stateMemberName: string, noFork: boolean): void {
+        let stateMembersInfo = this.classToStateMembersInfo.get(c);
+        if (!stateMembersInfo) {
+            stateMembersInfo = [];
+            this.classToStateMembersInfo.set(c, stateMembersInfo);
         }
-        stateMemberNames.push(stateMemberName);
+        stateMembersInfo.push({ name: stateMemberName, noFork });
     }
 
-    getStateMemberNames(c: Class): string[] {
-        const allStateMemberNames = new Set<string>();
+    getStateMembersInfo(c: Class): StateMemberInfo[] {
+        const allStateMembersInfo = new Set<StateMemberInfo>();
 
         let currentClass = c;
         while (currentClass) {
-            const currentClassStateMemberNames = this.classToStateMemberNames.get(currentClass);
-            if (currentClassStateMemberNames) {
-                for (const stateMemberName of currentClassStateMemberNames.reverse()) {
-                    allStateMemberNames.add(stateMemberName);
+            const currentClassStateMembersInfo = this.classToStateMembersInfo.get(currentClass);
+            if (currentClassStateMembersInfo) {
+                for (const stateMemberInfo of currentClassStateMembersInfo.reverse()) {
+                    allStateMembersInfo.add(stateMemberInfo);
                 }
             }
 
             currentClass = Object.getPrototypeOf(currentClass);
         }
-        return Array.from(allStateMemberNames).reverse();
+        return Array.from(allStateMembersInfo).reverse();
     }
 
     addAccessorAndMethodNames(c: Class): void {
@@ -125,6 +128,17 @@ export class StoreManager {
 
     storeIsCreated(storeId: string): boolean {
         return this.idToPiniaStore.has(storeId);
+    }
+
+    setOriginalStateMembers(
+        classStoreInstance: Record<string | symbol | number, any>,
+        originalStateMembers: Record<string, any>
+    ): void {
+        this.classStoreInstanceToOriginalStateMembers.set(classStoreInstance, originalStateMembers);
+    }
+
+    getOriginalStateMembers(classStoreInstance: Record<string | symbol | number, any>): Record<string, any> {
+        return this.classStoreInstanceToOriginalStateMembers.get(classStoreInstance);
     }
 
     private getMethodType(c: Class, methodName: string | symbol): 'constructor' | 'set' | 'get' | 'setget' | 'method' {

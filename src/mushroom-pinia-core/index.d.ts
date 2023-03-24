@@ -12,12 +12,16 @@ export type StoreOptions<T extends Record<string | symbol | number, any>> = {
     persist?: boolean | PersistedStateOptions<T> | PersistedStateOptions<T>[];
 } & ThisType<T>;
 
+export type StateOptions = {
+    noFork?: boolean;
+};
+
 export interface OnStoreCreated {
     onStoreCreated(): void;
 }
 
 export function Store<T extends Record<string | symbol | number, any>>(storeOptions?: StoreOptions<T>): ClassDecorator;
-export function State(): PropertyDecorator;
+export function State(stateOptions?: StateOptions): PropertyDecorator;
 
 export abstract class PiniaStore {
     $id: string;

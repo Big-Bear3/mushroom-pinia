@@ -1,9 +1,10 @@
-import type { NormalClass, StoreOptions } from '../types/globalTypes';
+import type { NormalClass, StateMemberInfo, StoreOptions } from '../types/globalTypes';
 
 import { createPinia, getActivePinia, setActivePinia, Store } from 'pinia';
 import { defineStore } from 'pinia';
 import { StoreManager } from '../store/storeManager';
 import { Message } from '../utils/message';
+import cloneDeep from 'lodash.clonedeep';
 
 export function Store<T extends Record<string | symbol | number, any>>(storeOptions?: StoreOptions<T>): ClassDecorator {
     return function (target: NormalClass) {
@@ -30,13 +31,20 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
             }
 
             // 将用@State()装饰器装饰的成员变量设置为State
-            const stateMemberNames = storeManager.getStateMemberNames(target.prototype);
-            if (stateMemberNames.length === 0) Message.throwError('29001', `该Store (${target.name}) 中无State！`);
+            const stateMembersInfo = storeManager.getStateMembersInfo(target.prototype);
+            if (stateMembersInfo.length === 0) Message.throwError('29001', `该Store (${target.name}) 中无State！`);
 
+            const originalStateMembers: Record<string, unknown> = {};
             const stateMembers: Record<string, unknown> = {};
-            for (const stateMemberName of stateMemberNames) {
-                stateMembers[stateMemberName] = classStoreInstance[stateMemberName];
+            for (const stateMemberInfo of stateMembersInfo) {
+                if (stateMemberInfo.noFork) {
+                    stateMembers[stateMemberInfo.name] = classStoreInstance[stateMemberInfo.name];
+                } else {
+                    originalStateMembers[stateMemberInfo.name] = classStoreInstance[stateMemberInfo.name];
+                    stateMembers[stateMemberInfo.name] = cloneDeep(classStoreInstance[stateMemberInfo.name]);
+                }
             }
+            storeManager.setOriginalStateMembers(classStoreInstance, originalStateMembers);
 
             // 只有get的字符串key的访问器设置为Getter
             const getAccessors: Record<string, () => unknown> = {};
@@ -64,19 +72,20 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
 
             // 创建Pinia Store
             const piniaStoreInstance = defineStore(storeId, <any>{
-                state: () => ({ ...stateMembers }),
+                state: () => stateMembers,
                 getters: getAccessors,
                 actions: methods,
                 persist: storeOptions?.persist
             })();
 
-            handleStateMembers(stateMemberNames, classStoreInstance, piniaStoreInstance);
-            handleNonStateMembers(stateMemberNames, methodNames, classStoreInstance, piniaStoreInstance);
+            handleStateMembers(stateMembersInfo, classStoreInstance, piniaStoreInstance);
+            handleNonStateMembers(stateMembersInfo, methodNames, classStoreInstance, piniaStoreInstance);
             handleMethods(methodNames, classStoreInstance, piniaStoreInstance);
             handleSetAccessors(storeManager.getSetAccessorNames(target), classStoreInstance, piniaStoreInstance);
             handleBothAccessors(storeManager.getBothAccessorNames(target), classStoreInstance, piniaStoreInstance);
             handleSymbolGetAccessors(storeManager.getSymbolGetAccessorNames(target), classStoreInstance, piniaStoreInstance);
             handleSymbolMethods(storeManager.getSymbolMethodNames(target), classStoreInstance, piniaStoreInstance);
+            handleResetFn(classStoreInstance, piniaStoreInstance);
 
             setPiniaBuiltinPropsToClassStoreInstance(classStoreInstance, piniaStoreInstance);
 
@@ -116,19 +125,19 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
 
 /** Class Store中的State映射至Pinia Store中的State */
 function handleStateMembers(
-    stateMemberNames: string[],
+    stateMembersInfo: StateMemberInfo[],
     classStoreInstance: Record<string | symbol | number, any>,
     piniaStoreInstance: Store
 ): void {
-    for (const stateMemberName of stateMemberNames) {
-        Reflect.defineProperty(classStoreInstance, stateMemberName, {
+    for (const stateMemberInfo of stateMembersInfo) {
+        Reflect.defineProperty(classStoreInstance, stateMemberInfo.name, {
             enumerable: true,
             configurable: true,
             get() {
-                return piniaStoreInstance[stateMemberName];
+                return piniaStoreInstance[stateMemberInfo.name];
             },
             set(value: unknown) {
-                piniaStoreInstance[stateMemberName] = value;
+                piniaStoreInstance[stateMemberInfo.name] = value;
             }
         });
     }
@@ -136,7 +145,7 @@ function handleStateMembers(
 
 /** 未被@State()装饰器装饰的成员变量定义成Pinia Store实例的属性 */
 function handleNonStateMembers(
-    stateMemberNames: string[],
+    stateMembersInfo: StateMemberInfo[],
     methodNames: string[],
     classStoreInstance: Record<string | symbol | number, any>,
     piniaStoreInstance: Store
@@ -146,7 +155,8 @@ function handleNonStateMembers(
     for (const memberName of classStoreMemberNames) {
         if (
             typeof memberName === 'symbol' ||
-            (stateMemberNames.indexOf(memberName) === -1 && (!methodNames || methodNames.indexOf(memberName) === -1))
+            (!stateMembersInfo.find((stateMemberInfo) => stateMemberInfo.name === memberName) &&
+                (!methodNames || methodNames.indexOf(memberName) === -1))
         ) {
             Reflect.defineProperty(piniaStoreInstance, memberName, {
                 enumerable: true,
@@ -257,6 +267,15 @@ function handleSymbolMethods(
             value: classStoreInstance[symbolMethodName]
         });
     }
+}
+
+/** 重新处理Pinia的$reset方法 */
+function handleResetFn(classStoreInstance: Record<string | symbol | number, any>, piniaStoreInstance: Store): void {
+    piniaStoreInstance.$reset = () => {
+        const storeManager = StoreManager.instance;
+        const originalStateMembers = storeManager.getOriginalStateMembers(classStoreInstance);
+        piniaStoreInstance.$patch(cloneDeep(originalStateMembers));
+    };
 }
 
 /** 将Pinia Store实例的内置方法映射到Class Store实例中，让Class Store内部也可以使用 */

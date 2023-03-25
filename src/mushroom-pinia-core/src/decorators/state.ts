@@ -10,6 +10,6 @@ export function State(stateOptions?: StateOptions): PropertyDecorator {
             Message.throwError('29002', `不能使用symbol作为State！Store: ${target.constructor.name}, State: ${String(key)}`);
             return;
         }
-        storeManager.addStateMembersInfo(target, <string>key.toString(), stateOptions?.noFork);
+        storeManager.addStateMembersInfo(target, <string>key.toString(), stateOptions?.noBak);
     } as PropertyDecorator;
 }

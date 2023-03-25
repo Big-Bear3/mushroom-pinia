@@ -37,11 +37,11 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
             const originalStateMembers: Record<string, unknown> = {};
             const stateMembers: Record<string, unknown> = {};
             for (const stateMemberInfo of stateMembersInfo) {
-                if (stateMemberInfo.noFork) {
+                if (stateMemberInfo.noBak) {
                     stateMembers[stateMemberInfo.name] = classStoreInstance[stateMemberInfo.name];
                 } else {
-                    originalStateMembers[stateMemberInfo.name] = classStoreInstance[stateMemberInfo.name];
-                    stateMembers[stateMemberInfo.name] = cloneDeep(classStoreInstance[stateMemberInfo.name]);
+                    originalStateMembers[stateMemberInfo.name] = cloneDeep(classStoreInstance[stateMemberInfo.name]);
+                    stateMembers[stateMemberInfo.name] = classStoreInstance[stateMemberInfo.name];
                 }
             }
             storeManager.setOriginalStateMembers(classStoreInstance, originalStateMembers);

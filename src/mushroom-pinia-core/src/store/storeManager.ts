@@ -30,13 +30,13 @@ export class StoreManager {
     /** class store的实例和fork的State成员变量的映射 */
     private classStoreInstanceToOriginalStateMembers = new WeakMap<Record<string | symbol | number, any>, Record<string, any>>();
 
-    addStateMembersInfo(c: Class, stateMemberName: string, noFork: boolean): void {
+    addStateMembersInfo(c: Class, stateMemberName: string, noBak: boolean): void {
         let stateMembersInfo = this.classToStateMembersInfo.get(c);
         if (!stateMembersInfo) {
             stateMembersInfo = [];
             this.classToStateMembersInfo.set(c, stateMembersInfo);
         }
-        stateMembersInfo.push({ name: stateMemberName, noFork });
+        stateMembersInfo.push({ name: stateMemberName, noBak });
     }
 
     getStateMembersInfo(c: Class): StateMemberInfo[] {

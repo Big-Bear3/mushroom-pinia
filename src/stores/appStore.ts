@@ -105,14 +105,14 @@ export class AppStore extends CommonStore {
     @State()
     count = 5;
 
-    @State({ noFork: true })
-    countNoFork = 1;
+    @State({ noBak: true })
+    countNoBak = 1;
 
     @State()
     countObj = { value: { val: 1 } };
 
-    @State({ noFork: true })
-    countObjNoFork = { value: { val: 1 } };
+    @State({ noBak: true })
+    countObjNoBak = { value: { val: 1 } };
 
     sign = '----';
 

@@ -187,17 +187,17 @@ it('重置Store', () => {
     appStore.version = '1.0.1';
     appStore.count = 100;
 
-    appStore.countNoFork = 2;
+    appStore.countNoBak = 2;
     appStore.countObj.value.val = 2;
-    appStore.countObjNoFork.value.val = 2;
+    appStore.countObjNoBak.value.val = 2;
 
     expect(appStore.version + appStore.count).toBe('1.0.1100');
 
     appStore.$reset();
     expect(appStore.version + appStore.count).toBe('1.0.05');
-    expect(appStore.countNoFork).toBe(2);
+    expect(appStore.countNoBak).toBe(2);
     expect(appStore.countObj.value.val).toBe(1);
-    expect(appStore.countObjNoFork.value.val).toBe(2);
+    expect(appStore.countObjNoBak.value.val).toBe(2);
 });
 
 it('Class Store的方法绑定至Pinia Store', () => {

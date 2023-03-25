@@ -13,7 +13,7 @@ export type StoreOptions<T extends Record<string | symbol | number, any>> = {
 } & ThisType<T>;
 
 export type StateOptions = {
-    noFork?: boolean;
+    noBak?: boolean;
 };
 
 export interface OnStoreCreated {

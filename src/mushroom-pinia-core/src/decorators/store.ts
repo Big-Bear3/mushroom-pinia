@@ -16,6 +16,9 @@ export function Store<T extends Record<string | symbol | number, any>>(storeOpti
             // 先创建Class Store对象
             const classStoreInstance = new target(...args);
 
+            /* c8 ignore next */
+            (<any>target)[StoreManager.afterClassStoreInstanceCreatedCbName]?.(classStoreInstance);
+
             // 如果未设置Store Id，则使用类名，如果Store Id是函数，则使用函数返回值
             const storeId =
                 storeOptions?.id === undefined || storeOptions?.id === null

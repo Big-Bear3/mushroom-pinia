@@ -6,6 +6,7 @@ export class StoreManager {
 
     static readonly originalClassPropName = '__mp_class';
     static readonly originalInstancePropName = '__mp_instance';
+    static readonly afterClassStoreInstanceCreatedCbName = '__mp_afterClassStoreInstanceCreated';
 
     static readonly hookMethodNames = ['onStoreCreated'];
 

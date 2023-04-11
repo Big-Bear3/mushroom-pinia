@@ -1,5 +1,5 @@
 {
-    "version": "1.1.6",
+    "version": "1.1.7",
     "name": "mushroom-pinia",
     "author": "BigBear3",
     "description": "Pinia class style.",
@@ -20,7 +20,8 @@
         "vue": "^3.0.0"
     },
     "dependencies": {
-        "lodash.clonedeep": "^4.5.0"
+        "lodash.clonedeep": "^4.5.0",
+        "pinia-plugin-persistedstate": "^3.1.0"
     },
     "devDependencies": {
         "@types/jest": "^29.0.1",

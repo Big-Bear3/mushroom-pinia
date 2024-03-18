@@ -220,6 +220,6 @@ it('钩子方法', () => {
 
 it('Pinia Store 和 Class Store的映射', () => {
     const appStore = new AppStore();
-    expect(AppStore[StoreManager.originalClassPropName].name).toBe('AppStore');
-    expect(appStore[StoreManager.originalInstancePropName].count).toBe(5);
+    expect((AppStore as any)[StoreManager.originalClassPropName].name).toBe('AppStore');
+    expect((appStore as any)[StoreManager.originalInstancePropName].count).toBe(5);
 });

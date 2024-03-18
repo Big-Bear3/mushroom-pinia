@@ -1,9 +1,11 @@
 {
     "extends": "./tsconfig.app.json",
+    "include": ["env.d.ts", "src/**/*", "src/**/*.vue","tests/**/*.spec.ts"],
     "exclude": [],
     "compilerOptions": {
         "experimentalDecorators": true,
         "composite": true,
+        "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.vitest.tsbuildinfo",
         "lib": [],
         "types": ["node", "jsdom"]
     }
